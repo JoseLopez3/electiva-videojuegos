@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class MovementPhisic : MonoBehaviour
 {
-    public float moveSpeed = 15f;
-    public float jumpForce = 7f;
+    private float moveSpeed = 14f;
+    private float jumpForce = 12f;
     private bool isGrounded;
-
-    private bool isJumping;
+    public int maxHealth;
+    public int totalDamage;
+    private int currentHealth;
+    public int maxScore;
+    private int currentScore;
+    private bool gameOver = false;
     private int moveX;
 
     public LayerMask groundLayer;
@@ -17,40 +21,77 @@ public class MovementPhisic : MonoBehaviour
     private bool facingRight = false;
     [SerializeField] private Animator animator;
 
+    public static MovementPhisic instance;
+
+    private void Awake(){
+        instance = this;
+    }
+
     private Rigidbody2D rb;
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        currentHealth = maxHealth;
 
     }
 
-    void DebugCurrentAnimationState()
-{
-    // Obtenemos la información del estado actual de la capa 0 (la capa base).
-    AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-    // Comprobamos el nombre de los estados que tengas en tu Animator Controller.
-    // Reemplaza "Idle", "Run", "Jump" con los nombres EXACTOS de tus animaciones.
-    if (stateInfo.IsName("mario_idle"))
+
+    private void DeactivateObject()
     {
-        Debug.Log("Estado actual: Idle");
-    }
-    else if (stateInfo.IsName("Entry"))
-    {
-        Debug.Log("Estado actual: entry");
-    }
-    else if (stateInfo.IsName("mario_walk"))
-    {
-        Debug.Log("Estado actual: walk");
+        gameObject.SetActive(false);
     }
 
-    else if (stateInfo.IsName("mario_jump"))
-    {
-        Debug.Log("Estado actual: jump");
+    public void DealDamage(){
+
+        if (gameOver)
+        {
+            return; // Sale de la función inmediatamente, para prevenir a anystate en un bucle infinito.
+        }
+
+
+        currentHealth = currentHealth - totalDamage;
+        
+        if(currentHealth <= 0){
+            Debug.Log("Game over");
+
+            gameOver = true; 
+            animator.SetBool("LeblancDeath", true);
+
+
+            // Desactivamos el control para que no haya interferencias.
+            this.enabled = false; 
+
+            GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+
+
+            float deactivetObjectDuration = 1.7f;
+
+            Invoke("DeactivateObject",deactivetObjectDuration);
+
+        }
     }
-    // Puedes añadir más 'else if' para otros estados.
-}
+
+    public void AddScore(){
+
+        
+
+        currentScore++;
+        
+        if(currentScore >= maxScore){
+            animator.SetBool("LeblancWin", true);
+            // Desactivamos el control para que no haya interferencias.
+            this.enabled = false; 
+
+            GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            float deactivetObjectDuration = 1f;
+
+            Debug.Log("You Win");
+            Invoke("DeactivateObject",deactivetObjectDuration);
+        }
+    }
+
 
     void FixedUpdate()
     {
@@ -77,9 +118,10 @@ public class MovementPhisic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
-        animator.SetBool("isJumping", isGrounded);
+
         
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded )
         {
@@ -93,7 +135,6 @@ public class MovementPhisic : MonoBehaviour
         else if (moveX < 0 && facingRight)
             Flip();
 
-        DebugCurrentAnimationState(); 
         
     }
 
