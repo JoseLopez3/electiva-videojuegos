@@ -5,34 +5,34 @@ using UnityEngine;
 public class MovementPhisic : MonoBehaviour
 {
     private float moveSpeed = 14f;
-    private float jumpForce = 12f;
-    private bool isGrounded;
     public int maxHealth;
-    public int totalDamage;
+    // public int totalDamage;
     private int currentHealth;
-    public int maxScore;
     private int currentScore;
     private bool gameOver = false;
     private int moveX;
 
-    public LayerMask groundLayer;
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
     private bool facingRight = false;
     [SerializeField] private Animator animator;
 
     public static MovementPhisic instance;
+
+    [Header("Shooting")]
+    [SerializeField] private Transform firePoint; // Ubicacion de donde sale la bala
+    [SerializeField] private float fireRate = 0.5f; 
+    [SerializeField] private int bulletDamage = 25;
+    private float nextFireTime = 0f;
 
     private void Awake(){
         instance = this;
     }
 
     private Rigidbody2D rb;
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
+        GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
 
     }
 
@@ -43,18 +43,19 @@ public class MovementPhisic : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void DealDamage(){
+    public void DealDamage(int damage){
 
         if (gameOver)
         {
-            return; // Sale de la función inmediatamente, para prevenir a anystate en un bucle infinito.
+            return; 
         }
 
 
-        currentHealth = currentHealth - totalDamage;
-        
+        currentHealth -= damage;
+        GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+
         if(currentHealth <= 0){
-            Debug.Log("Game over");
+            Debug.Log("Fin del juego");
 
             gameOver = true; 
             animator.SetBool("LeblancDeath", true);
@@ -69,64 +70,60 @@ public class MovementPhisic : MonoBehaviour
             float deactivetObjectDuration = 1.7f;
 
             Invoke("DeactivateObject",deactivetObjectDuration);
+            GameManager.Instance.GameOver(false);
 
         }
     }
 
-    public void AddScore(){
+    // public void AddScore(){
 
         
 
-        currentScore++;
+    //     currentScore++;
         
-        if(currentScore >= maxScore){
-            animator.SetBool("LeblancWin", true);
-            // Desactivamos el control para que no haya interferencias.
-            this.enabled = false; 
+    //     if(currentScore >= maxScore){
+    //         animator.SetBool("LeblancWin", true);
+    //         // Desactivamos el control para que no haya interferencias.
+    //         this.enabled = false; 
 
-            GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-            float deactivetObjectDuration = 1f;
+    //         GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+    //         float deactivetObjectDuration = 1f;
 
-            Debug.Log("You Win");
-            Invoke("DeactivateObject",deactivetObjectDuration);
-        }
-    }
+    //         Debug.Log("You Win");
+    //         Invoke("DeactivateObject",deactivetObjectDuration);
+    //     }
+    // }
 
 
-    void FixedUpdate()
+     void FixedUpdate()
     {
-        float moveX = 0f;
+        // Input de movimiento de ambos ejes
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical"); 
 
-        // if (Input.GetKey(KeyCode.A))
-        //     moveX = -1f;
-        // else if (Input.GetKey(KeyCode.D))
-        //     moveX = 1f;
-        
-        moveX = Input.GetAxisRaw("Horizontal");
+        //Se normaliza para que no se mueva mas rapido en diagonal.
+        Vector2 moveDirection = new Vector2(moveX, moveY).normalized;
 
-        rb.velocity = new Vector2(moveX * moveSpeed, rb.velocity.y);
+        rb.velocity = moveDirection * moveSpeed;
 
-         float absMoveX = Mathf.Abs(moveX);
-
-        int speedInt = Mathf.RoundToInt(absMoveX);
-        animator.SetInteger("SpeedX", Mathf.Abs(speedInt));
-
-
+     
+        animator.SetFloat("Speed", rb.velocity.magnitude);
     }
     
 
-    // Update is called once per frame
-    void Update()
+     void Update()
     {
-        
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
 
+        //Obtiene la posicion del mouse en el mundo del juego
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePosition.z = 0; 
 
-        
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded )
-        {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        }
+        // Calcula la direccion desde el firePoint hasta el mouse
+        Vector2 aimDirection = (mousePosition - firePoint.position).normalized;
+
+        // Calcular el angulo para rotar el firePoint
+        float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
+        firePoint.eulerAngles = new Vector3(0, 0, angle);
 
         // Detectar flip visual
         float moveX = Input.GetAxisRaw("Horizontal");
@@ -135,14 +132,53 @@ public class MovementPhisic : MonoBehaviour
         else if (moveX < 0 && facingRight)
             Flip();
 
-        
+
+        //Logica de disparo
+        if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
+        {
+            nextFireTime = Time.time + 1f / fireRate;
+            Shoot(aimDirection); 
+        }
+    }
+
+    void Shoot(Vector2 direction) 
+    {
+        GameObject bulletObject = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", firePoint.position, firePoint.rotation);
+        if (bulletObject != null)
+        {
+            Bullet bulletScript = bulletObject.GetComponent<Bullet>();
+            // Usamos la dirección que le pasamos al método
+            bulletScript.SetDirection(direction);
+            // Le decimos a la bala cuánto daño hacer
+            bulletScript.damageAmount = bulletDamage;
+            bulletScript.SetDirection(direction);
+        }
     }
 
     void Flip()
     {
         facingRight = !facingRight;
         Vector3 scale = transform.localScale;
-        scale.x *= -1;  // Invierte la escala en X
+        scale.x *= -1; 
         transform.localScale = scale;
     }
+
+    void Shoot()
+    {
+        // Se pide una bala al pooler y se guarda una referencia a ella
+        GameObject bulletObject = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", firePoint.position, firePoint.rotation);
+
+        if (bulletObject != null)
+        {
+            Bullet bulletScript = bulletObject.GetComponent<Bullet>();
+
+            // Se decide la direccion del disparo dependiendo de donde mire el jugador
+            Vector2 shootDirection = facingRight ? Vector2.right : Vector2.left;
+
+            bulletScript.SetDirection(shootDirection);
+        }
+    }
+
+
+
 }
