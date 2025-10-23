@@ -6,7 +6,7 @@ TextureImporter:
   serializedVersion: 12
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -36,13 +36,13 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 0
-    wrapV: 0
+    wrapU: 1
+    wrapV: 1
     wrapW: 0
-  nPOTScale: 1
+  nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 0
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -51,9 +51,9 @@ TextureImporter:
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 0
+  alphaIsTransparency: 1
   spriteTessellationDetail: -1
-  textureType: 0
+  textureType: 8
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -115,18 +115,722 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: thrust_oversize_0
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 641
+        width: 34
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 133e2b56a2cdf0943adb948752e7d4c7
+      internalID: -505339379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_1
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 640
+        width: 33
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90b7d770a9582f04cb6710b3f36e2d13
+      internalID: 380684204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_2
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 640
+        width: 32
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e617280e5a021204c8b4b1e702e6728a
+      internalID: 2056450943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_3
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 640
+        width: 36
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e56dea997b9fd064b92fa4c1d0d0d988
+      internalID: 996817251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_4
+      rect:
+        serializedVersion: 2
+        x: 849
+        y: 640
+        width: 39
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c09625d51927acd439877f4f95a2c04d
+      internalID: -1536724181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_5
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 640
+        width: 39
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 69a523cd119e3b3469495c79d44c3735
+      internalID: 420480924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_6
+      rect:
+        serializedVersion: 2
+        x: 1233
+        y: 640
+        width: 39
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e191beba5e035ac4ca5cf92926240bd4
+      internalID: -1736343091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_7
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 640
+        width: 36
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a29182591b14fa1479c44b098b66ec39
+      internalID: 459864152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_8
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 450
+        width: 32
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1ae4874b8b5f1d4f9be19d87d7a45bf
+      internalID: 236019528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_9
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 450
+        width: 42
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 219163322dd29104983c8dee074e732c
+      internalID: 792571373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_10
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 450
+        width: 44
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59155f6636fb11648b8b135eb3c54837
+      internalID: 2017822705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_11
+      rect:
+        serializedVersion: 2
+        x: 645
+        y: 450
+        width: 43
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c3d95aadfcdcea4c86760a63affb00c
+      internalID: -631981144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_12
+      rect:
+        serializedVersion: 2
+        x: 831
+        y: 450
+        width: 47
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 424a4375a5d340e4fa7b3c44557cba66
+      internalID: 1030025488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_13
+      rect:
+        serializedVersion: 2
+        x: 1021
+        y: 450
+        width: 49
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d986cf9629eb80c42a244cbf8246b4a2
+      internalID: 1083409601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_14
+      rect:
+        serializedVersion: 2
+        x: 1215
+        y: 450
+        width: 47
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ebaf8f467414b14398cccc8706912a4
+      internalID: -1073362507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_15
+      rect:
+        serializedVersion: 2
+        x: 1413
+        y: 450
+        width: 43
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e669c7e6f9fbba24695fd0dacb15831d
+      internalID: 660632379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_16
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 258
+        width: 32
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c02ec8b42ed21b2459698f084c2fa175
+      internalID: -1199975405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_17
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 258
+        width: 35
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 142b78723f7e08240875fb66fdecfb74
+      internalID: -2125638223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_18
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 259
+        width: 35
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12bee7dfa3f3e6a4195215a8c8bf4071
+      internalID: -1636711042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_19
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 259
+        width: 33
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 30784c7d9af550f4083e20d571daf19b
+      internalID: -1488421719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_20
+      rect:
+        serializedVersion: 2
+        x: 849
+        y: 257
+        width: 32
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fcdfaed0a345dd743bb31cb3a4d82736
+      internalID: 1752936852
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_21
+      rect:
+        serializedVersion: 2
+        x: 1041
+        y: 255
+        width: 32
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8336c9f460b38647b6e05918fa449b6
+      internalID: 1219413822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_22
+      rect:
+        serializedVersion: 2
+        x: 1233
+        y: 257
+        width: 32
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ddc8a639e628c6341b330c3e8baec382
+      internalID: 709337770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_23
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 259
+        width: 33
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 995b509cb53997f4ab2aec9604de316f
+      internalID: -216095924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_24
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 66
+        width: 32
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d92580cd9dba7e48aecaeefc1e9d6bb
+      internalID: -2107535713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_25
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 66
+        width: 42
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e241049c55343834cb4fe8d2539d515d
+      internalID: -180602646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_26
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 66
+        width: 44
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b5f80f3df1a77f64f9a3e4d6611762ea
+      internalID: -1660395643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_27
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 66
+        width: 43
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54606c26415badc47ad5ec6ccb8399bd
+      internalID: 337082370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_28
+      rect:
+        serializedVersion: 2
+        x: 850
+        y: 66
+        width: 47
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d066aae5b8326a46bab0fc8047307c2
+      internalID: -322626448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_29
+      rect:
+        serializedVersion: 2
+        x: 1042
+        y: 66
+        width: 49
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac50704aa297d1a43829807d353e0a4c
+      internalID: -523161700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_30
+      rect:
+        serializedVersion: 2
+        x: 1234
+        y: 66
+        width: 47
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32c56194563b29741b91cf87a73414eb
+      internalID: -2100790667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thrust_oversize_31
+      rect:
+        serializedVersion: 2
+        x: 1424
+        y: 66
+        width: 43
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f7283eda20e2da46857d70724a6f1f1
+      internalID: -804088846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 845b1e69267d1a140a43209d0d9f996b
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      thrust_oversize_0: -505339379
+      thrust_oversize_1: 380684204
+      thrust_oversize_10: 2017822705
+      thrust_oversize_11: -631981144
+      thrust_oversize_12: 1030025488
+      thrust_oversize_13: 1083409601
+      thrust_oversize_14: -1073362507
+      thrust_oversize_15: 660632379
+      thrust_oversize_16: -1199975405
+      thrust_oversize_17: -2125638223
+      thrust_oversize_18: -1636711042
+      thrust_oversize_19: -1488421719
+      thrust_oversize_2: 2056450943
+      thrust_oversize_20: 1752936852
+      thrust_oversize_21: 1219413822
+      thrust_oversize_22: 709337770
+      thrust_oversize_23: -216095924
+      thrust_oversize_24: -2107535713
+      thrust_oversize_25: -180602646
+      thrust_oversize_26: -1660395643
+      thrust_oversize_27: 337082370
+      thrust_oversize_28: -322626448
+      thrust_oversize_29: -523161700
+      thrust_oversize_3: 996817251
+      thrust_oversize_30: -2100790667
+      thrust_oversize_31: -804088846
+      thrust_oversize_4: -1536724181
+      thrust_oversize_5: 420480924
+      thrust_oversize_6: -1736343091
+      thrust_oversize_7: 459864152
+      thrust_oversize_8: 236019528
+      thrust_oversize_9: 792571373
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

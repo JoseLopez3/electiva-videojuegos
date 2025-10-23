@@ -1,158 +1,171 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 
 public class EnemyAI : MonoBehaviour
 {
+    [Header("Enemy Configuration")]
+    public List<EnemyAttackPhase> attackPhases;
+    public Transform firePoint;
+    public string enemyBulletTag = "EnemyBullet";
+    public int bulletDamage = 10;
+
     [Header("Health")]
     public int maxHealth = 100;
     private int currentHealth;
-
-
-    [Header("Patrol")]
-    public Transform[] patrolPoints;
-    public float patrolSpeed = 3f;
-    private int currentPointIndex = 0;
-    private bool facingRight = true; 
-
-    [Header("UI")]
     [SerializeField] private Slider healthBar;
 
-    [Header("Shooting")]
-    public float shootingRange = 10f;
-    public float fireRate = 1f;
-    public Transform firePoint; // El punto de origen del disparo
-    public string enemyBulletTag = "EnemyBullet";
+    private int currentPhaseIndex = -1;
+    private BulletPatternSO currentPattern;
     private float nextFireTime = 0f;
-    public int bulletDamage = 10;
-    private Transform player;
+    private float currentSpiralAngle = 0f;
+    private bool isShooting = false; // Bloqueo para evitar que las corrutinas se solapen
 
     void Start()
     {
         currentHealth = maxHealth;
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        // Se registra en el GameManager y actualiza su barra de vida inicial
         GameManager.Instance.RegisterEnemy(this);
-        
         UpdateHealthBar();
-        
-        // Direccion del enemigo
-        if (patrolPoints.Length > 0 && patrolPoints[0].position.x < transform.position.x)
-        {
-            Flip(); 
-        }
+        SwitchToPhase(0); 
     }
 
     void Update()
     {
-        if (player == null) return;
+        CheckForPhaseSwitch();
 
-        float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= shootingRange)
+        if (Time.time >= nextFireTime && !isShooting)
         {
-            // Si el jugador está en rango, deja de patrullar, mira al jugador y dispara.
-            AimAndShoot();
-        }
-        else
-        {
-            Patrol();
-        }
-    }
-
-    void Patrol()
-    {
-        if (patrolPoints.Length == 0) return;
-
-        Transform targetPoint = patrolPoints[currentPointIndex];
-        
-        // Moverse hacia el punto de patrulla
-        transform.position = Vector2.MoveTowards(transform.position, targetPoint.position, patrolSpeed * Time.deltaTime);
-
-
-        if (targetPoint.position.x > transform.position.x && !facingRight)
-        {
-            Flip(); 
-            
-        }
-        else if (targetPoint.position.x < transform.position.x && facingRight)
-        {
-            Flip(); 
-            
-        }
-
-        // Cambiar al siguiente punto de patrulla
-        if (Vector2.Distance(transform.position, targetPoint.position) < 0.1f)
-        {
-            currentPointIndex = (currentPointIndex + 1) % patrolPoints.Length;
-        }
-    }
-
-    void AimAndShoot()
-    
-    {
-
-        
-        // Lógica de Flip para apuntar al jugador
-        if (player.position.x > transform.position.x && !facingRight)
-        {
-            Flip();
-        }
-        else if (player.position.x < transform.position.x && facingRight)
-        {
-            Flip();
-        }
-
-        // Disparar (si ha pasado el tiempo de recarga)
-         if (Time.time >= nextFireTime)
-        {
-            nextFireTime = Time.time + 1f / fireRate;
-            
-            GameObject bulletObject = ObjectPooler.Instance.SpawnFromPool(enemyBulletTag, firePoint.position, Quaternion.identity);
-            if (bulletObject != null)
+            if (currentPattern != null)
             {
-                Bullet bulletScript = bulletObject.GetComponent<Bullet>();
-                // Le decimos a la bala cuánto daño hacer
-                bulletScript.damageAmount = bulletDamage; 
-                
-                Vector2 directionToPlayer = (player.position - firePoint.position).normalized;
-                bulletScript.SetDirection(directionToPlayer);
+                StartCoroutine(ShootPatternCoroutine(currentPattern));
+                nextFireTime = Time.time + currentPattern.timeBetweenBursts;
             }
         }
-    
     }
-
-
-    public void DealDamage(int damage)
+    
+    void CheckForPhaseSwitch()
     {
-        currentHealth -= damage;
-        Debug.Log("Enemy Health: " + currentHealth);
-        UpdateHealthBar();
-        if (currentHealth <= 0)
+        if (currentPhaseIndex + 1 >= attackPhases.Count) return;
+        float gameTimeLeft = GameManager.Instance.GetCurrentTime();
+        if (gameTimeLeft <= attackPhases[currentPhaseIndex + 1].triggerTimeInSeconds)
         {
-            Die();
+            SwitchToPhase(currentPhaseIndex + 1);
         }
     }
 
-    private void Die()
+    void SwitchToPhase(int phaseIndex)
     {
-        Debug.Log("El enemigo ha sido derrotado");
-        GameManager.Instance.UnregisterEnemy(this);
-        gameObject.SetActive(false); 
+        if (phaseIndex >= attackPhases.Count) return;
+        currentPhaseIndex = phaseIndex;
+        currentPattern = attackPhases[phaseIndex].pattern;
+        nextFireTime = Time.time;
+        currentSpiralAngle = 0;
+        StopAllCoroutines(); // Detenemos cualquier patrón anterior
+        isShooting = false;
+        Debug.Log("Enemigo entrando en fase: " + attackPhases[phaseIndex].phaseName);
     }
 
-    void Flip()
+    IEnumerator ShootPatternCoroutine(BulletPatternSO pattern)
     {
-        facingRight = !facingRight;
-        Vector3 scale = transform.localScale;
-        scale.x *= -1;
-        transform.localScale = scale;
+        isShooting = true;
+
+        switch (pattern.patternType)
+        {
+            case BulletPatternSO.PatternType.Circle:
+                float angleStepCircle = 360f / pattern.numberOfProjectiles;
+                for (int i = 0; i < pattern.numberOfProjectiles; i++)
+                {
+                    float angle = (i * angleStepCircle) + pattern.startAngleOffset;
+                    SpawnBullet(angle, pattern.projectileSpeed);
+                }
+                break;
+
+            case BulletPatternSO.PatternType.Spiral:
+                for(int i = 0; i < pattern.numberOfProjectiles; i++)
+                {
+                    currentSpiralAngle += pattern.angleStep;
+                    SpawnBullet(currentSpiralAngle + pattern.startAngleOffset, pattern.projectileSpeed);
+                    yield return new WaitForSeconds(pattern.timeBetweenShots);
+                }
+                break;
+
+            case BulletPatternSO.PatternType.AimedBurst:
+                for (int i = 0; i < pattern.burstCount; i++)
+                {
+                    float burstBaseAngle = i * pattern.angleBetweenBursts;
+                    for (int j = 0; j < pattern.numberOfProjectiles; j++)
+                    {
+                        float projectileAngle;
+                        if (pattern.numberOfProjectiles > 1)
+                            projectileAngle = burstBaseAngle - (pattern.angleSpread / 2) + (pattern.angleSpread / (pattern.numberOfProjectiles - 1)) * j;
+                        else
+                            projectileAngle = burstBaseAngle;
+                        SpawnBullet(projectileAngle, pattern.projectileSpeed);
+                    }
+                }
+                break;
+
+            case BulletPatternSO.PatternType.SequentialBurst:
+                float currentBurstAngle = pattern.startAngleOffset - (pattern.angleBetweenBursts * (pattern.burstCount -1) / 2f);
+                for(int i = 0; i < pattern.burstCount; i++) // Este bucle controla las 3 ráfagas principales
+                {
+                    for(int j = 0; j < pattern.numberOfProjectiles; j++) // Este bucle controla las 5 balas de CADA ráfaga
+                    {
+                        float projectileAngle;
+                        if (pattern.numberOfProjectiles > 1 && pattern.angleSpread > 0)
+                            projectileAngle = currentBurstAngle - (pattern.angleSpread / 2) + (pattern.angleSpread / (pattern.numberOfProjectiles - 1)) * j;
+                        else
+                            projectileAngle = currentBurstAngle;
+                        
+                        SpawnBullet(projectileAngle, pattern.projectileSpeed);
+
+                        // ¡AQUÍ ESTÁ LA LÍNEA MÁGICA!
+                        // Añadimos una pequeña pausa después de CADA bala.
+                        yield return new WaitForSeconds(pattern.timeBetweenProjectilesInBurst); 
+                    }
+                    currentBurstAngle += pattern.angleBetweenBursts;
+                    // Esta pausa es para esperar entre una ráfaga y la siguiente (ej. entre la de 0° y la de 30°)
+                    yield return new WaitForSeconds(pattern.timeBetweenShots);
+                }
+                break;
+
+            case BulletPatternSO.PatternType.DoubleSpiralFlower:
+                float anglePerPetal = 360f / pattern.petals;
+                for(int i = 0; i < pattern.numberOfProjectiles; i++)
+                {
+                    currentSpiralAngle += pattern.angleStep;
+                    for(int j = 0; j < pattern.petals; j++)
+                    {
+                        float petalBaseAngle = j * anglePerPetal;
+                        // Espiral 1 (sentido horario)
+                        SpawnBullet(petalBaseAngle + currentSpiralAngle, pattern.projectileSpeed);
+                        // Espiral 2 (sentido anti-horario)
+                        SpawnBullet(petalBaseAngle - currentSpiralAngle, pattern.projectileSpeed);
+                    }
+                    yield return new WaitForSeconds(pattern.timeBetweenShots);
+                }
+                break;
+        }
+        
+        isShooting = false;
     }
 
- 
-
-    private void UpdateHealthBar()
+    void SpawnBullet(float angle, float speed)
     {
-        healthBar.maxValue = maxHealth;
-        healthBar.value = currentHealth;
+        GameObject bulletObject = ObjectPooler.Instance.SpawnFromPool(enemyBulletTag, firePoint.position, Quaternion.identity);
+        if (bulletObject != null)
+        {
+            Bullet bulletScript = bulletObject.GetComponent<Bullet>();
+            bulletScript.damageAmount = bulletDamage;
+            Quaternion rotation = Quaternion.Euler(0, 0, angle);
+            Vector2 direction = rotation * Vector2.up;
+            bulletScript.SetDirection(direction * speed); // Simplificado, ya que la velocidad está en el vector
+        }
     }
+    
+    // El resto de los métodos (DealDamage, Die, UpdateHealthBar) no cambian.
+    public void DealDamage(int damage) { currentHealth -= damage; UpdateHealthBar(); if (currentHealth <= 0) Die(); }
+    private void Die() { GameManager.Instance.UnregisterEnemy(this); gameObject.SetActive(false); }
+    private void UpdateHealthBar() { if(healthBar != null) { healthBar.maxValue = maxHealth; healthBar.value = currentHealth; } }
 }

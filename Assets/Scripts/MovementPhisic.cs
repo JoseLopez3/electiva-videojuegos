@@ -11,6 +11,8 @@ public class MovementPhisic : MonoBehaviour
     private int currentScore;
     private bool gameOver = false;
     private int moveX;
+    private float originalFireRate;
+    private Coroutine attackSpeedCoroutine;
 
     private bool facingRight = false;
     [SerializeField] private Animator animator;
@@ -34,6 +36,7 @@ public class MovementPhisic : MonoBehaviour
         currentHealth = maxHealth;
         GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
 
+        originalFireRate = fireRate;
     }
 
 
@@ -180,5 +183,37 @@ public class MovementPhisic : MonoBehaviour
     }
 
 
+
+public void Heal(int amount)
+{
+    currentHealth += amount;
+    if (currentHealth > maxHealth)
+    {
+        currentHealth = maxHealth;
+    }
+    Debug.Log("Jugador curado! Vida actual: " + currentHealth);
+    GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+}
+
+public void ApplyAttackSpeedBuff(float multiplier, float duration)
+{
+    if (attackSpeedCoroutine != null)
+    {
+        StopCoroutine(attackSpeedCoroutine); // Detiene el buff anterior si había uno
+    }
+    attackSpeedCoroutine = StartCoroutine(AttackSpeedBuffCoroutine(multiplier, duration));
+}
+
+private IEnumerator AttackSpeedBuffCoroutine(float multiplier, float duration)
+{
+    Debug.Log("Buff de velocidad de ataque activado!");
+    fireRate *= multiplier; // Aumentamos la velocidad de ataque
+
+    yield return new WaitForSeconds(duration); // Esperamos la duración del buff
+
+    Debug.Log("Buff de velocidad de ataque terminado.");
+    fireRate = originalFireRate; // Restauramos la velocidad de ataque original
+    attackSpeedCoroutine = null;
+}
 
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI; 
 using TMPro; 
 using UnityEngine.SceneManagement; 
+using DG.Tweening; 
 
 public class GameManager : MonoBehaviour
 {
@@ -45,6 +46,10 @@ public class GameManager : MonoBehaviour
         HandlePauseInput();
     }
 
+    public void GoToMenu(){
+        SceneManager.LoadScene(0);
+    }
+
     private void HandleTimer()
     {
         currentTime -= Time.deltaTime;
@@ -68,20 +73,67 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void TogglePause()
+    // --- CÓDIGO NUEVO CON DOTWEEN (DESPUÉS) ---
+public void TogglePause()
+{
+    isPaused = !isPaused;
+
+    if (isPaused)
     {
-        isPaused = !isPaused;
-        if (isPaused)
-        {
-            Time.timeScale = 0f; // Pausa el juego
-            pauseMenuPanel.SetActive(true);
-        }
-        else
-        {
-            Time.timeScale = 1f; // Reanuda el juego
-            pauseMenuPanel.SetActive(false);
-        }
+        Time.timeScale = 0f; // Pausamos el juego
+
+        // Preparamos el panel para la animación de entrada
+        pauseMenuPanel.transform.localScale = Vector3.zero; // Lo hacemos invisible al instante
+        pauseMenuPanel.SetActive(true); // Lo activamos para poder animarlo
+
+        // Creamos la animación de escalado para que aparezca
+        pauseMenuPanel.transform.DOScale(1f, 0.3f)
+            .SetEase(Ease.OutBack) // Un efecto de "rebote" muy agradable
+            .SetUpdate(true); // ¡MUY IMPORTANTE! Para que la animación funcione aunque el juego esté pausado (Time.timeScale = 0)
     }
+    else
+    {
+        // Creamos la animación para que se encoja y desaparezca
+        pauseMenuPanel.transform.DOScale(0f, 0.2f)
+            .SetEase(Ease.InBack) // El efecto de rebote inverso
+            .SetUpdate(true) // También necesita esto para funcionar
+            .OnComplete(() => {
+                // Esto se ejecuta CUANDO la animación TERMINA
+                pauseMenuPanel.SetActive(false); // Ahora sí lo desactivamos
+                Time.timeScale = 1f; // Reanudamos el juego
+            });
+    }
+}
+
+// Añade este nuevo método a tu GameManager.cs
+
+public void RestartGameWithAnimation()
+{
+    // Animamos el menú para que se encoja y desaparezca
+    pauseMenuPanel.transform.DOScale(0f, 0.2f)
+        .SetEase(Ease.InBack)
+        .SetUpdate(true)
+        .OnComplete(() => {
+            // Cuando la animación termina, reiniciamos el juego
+            Time.timeScale = 1f; // ¡Muy importante restaurar el tiempo antes de cambiar de escena!
+            RestartGame(); // Llamamos a tu método original de reinicio
+        });
+}
+
+// Puedes crear otro método similar para volver al menú principal
+public void QuitToMenuWithAnimation()
+{
+    // Animamos el menú para que se encoja y desaparezca
+    pauseMenuPanel.transform.DOScale(0f, 0.2f)
+        .SetEase(Ease.InBack)
+        .SetUpdate(true)
+        .OnComplete(() => {
+            // Cuando la animación termina, volvemos al menú
+            Time.timeScale = 1f;
+            // Aquí iría tu lógica para cargar la escena del menú principal, por ejemplo:
+            // SceneManager.LoadScene("MainMenu"); 
+        });
+}
 
     public void GameOver(bool playerWon)
     {
@@ -101,6 +153,15 @@ public class GameManager : MonoBehaviour
         {
             endGameText.text = "DERROTA";
         }
+
+        // Preparamos el panel para la animación de entrada
+    gameOverMenuPanel.transform.localScale = Vector3.zero; // Lo hacemos invisible al instante
+    gameOverMenuPanel.SetActive(true); // Lo activamos para poder animarlo
+
+    // Creamos la animación de escalado para que aparezca
+    gameOverMenuPanel.transform.DOScale(1f, 0.5f) // Le damos un poco más de tiempo para que sea más dramático
+        .SetEase(Ease.OutElastic) // Un efecto elástico es genial para pantallas de fin de nivel
+        .SetUpdate(true); // Para que la animación funcione con Time.timeScale = 0
     }
 
     //Metodos para botones
@@ -134,5 +195,10 @@ public class GameManager : MonoBehaviour
         {
             GameOver(true); // Todos los enemigos derrotados, el jugador gana
         }
+    }
+
+    public float GetCurrentTime()
+    {
+        return currentTime;
     }
 }

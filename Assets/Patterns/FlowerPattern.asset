@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9803853d4bb24da4aaefa0436c11093e, type: 3}
+  m_Name: FlowerPattern
+  m_EditorClassIdentifier: 
+  patternType: 4
+  numberOfProjectiles: 80
+  projectileSpeed: 4
+  timeBetweenBursts: 4
+  startAngleOffset: 0
+  angleStep: 5
+  timeBetweenShots: 0.04
+  burstCount: 0
+  angleBetweenBursts: 0
+  angleSpread: 0
+  timeBetweenProjectilesInBurst: 0.05
+  petals: 6
