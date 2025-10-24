@@ -34,11 +34,10 @@ public class ItemPickup : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // Intenta añadir el item al inventario (que crearemos ahora)
-            bool wasPickedUp = InventoryManager.Instance.AddItem(item);
-            if (wasPickedUp)
-            {
-                Destroy(gameObject); // Solo se destruye si se pudo recoger
-            }
+            // bool wasPickedUp = InventoryManager.Instance.AddItem(item);
+            GameEvents.ItemPickedUp(item); // Anuncia que se intentó recoger un item
+        // El InventoryManager decidirá si puede o no añadirlo.
+            Destroy(gameObject); // Asumimos que siempre se recoge.
         }
     }
 }

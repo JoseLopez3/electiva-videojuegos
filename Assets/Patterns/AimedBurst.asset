@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patternType: 2
   numberOfProjectiles: 3
-  projectileSpeed: 4
+  projectileSpeed: 8
   timeBetweenBursts: 1.5
   startAngleOffset: 0
   angleStep: 10
@@ -22,4 +22,5 @@ MonoBehaviour:
   burstCount: 5
   angleBetweenBursts: 72
   angleSpread: 20
+  timeBetweenProjectilesInBurst: 0.05
   petals: 6

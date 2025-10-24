@@ -27,7 +27,7 @@ public class InventoryManager : MonoBehaviour
     {
         // Encontramos la referencia al jugador para poder aplicarle los efectos
         playerMovement = FindObjectOfType<MovementPhisic>();
-        UpdateHotbarUI();
+        GameEvents.HotbarUpdated();
     }
 
     private void Update()
@@ -38,17 +38,19 @@ public class InventoryManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3)) UseItem(2);
     }
 
-    public bool AddItem(ConsumableItem item)
+    public void AddItem(ConsumableItem item)
     {
-        if  (items.Count >= slots.Length)
+        Debug.Log("items.Count!" + items.Count);
+        if (items.Count >= hotbarSize - 1)
         {
             Debug.Log("Inventario lleno!");
-            return false; // No se pudo añadir
+            return; // Simplemente no lo añade
         }
 
         items.Add(item);
-        UpdateHotbarUI();
-        return true; // Se añadió con éxito
+        // ANTES: UpdateHotbarUI();
+        // AHORA: Anunciamos el cambio
+        GameEvents.HotbarUpdated();
     }
 
     public void UseItem(int slotIndex)
@@ -75,10 +77,10 @@ public class InventoryManager : MonoBehaviour
 
         // Remover el item de la lista
         items.RemoveAt(slotIndex);
-        UpdateHotbarUI();
+        GameEvents.HotbarUpdated();
     }
 
-    void UpdateHotbarUI()
+    private void OnHotbarUpdated()
     {
         for (int i = 0; i <  slots.Length; i++)
         {
@@ -95,5 +97,17 @@ public class InventoryManager : MonoBehaviour
                 slotIcons[i].enabled = false;
             }
         }
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.OnItemPickedUp += AddItem;
+        GameEvents.OnHotbarUpdated += OnHotbarUpdated;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnItemPickedUp -= AddItem;
+        GameEvents.OnHotbarUpdated -= OnHotbarUpdated;
     }
 }

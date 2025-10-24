@@ -3,20 +3,25 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public float speed = 20f;
-    public float lifeTime = 2f;
+    public float lifeTime = 20f;
     public int damageAmount; 
     private Rigidbody2D rb;
+    
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
     }
 
+    public void SetVelocity(Vector2 velocityVector)
+    {
+        rb.velocity = velocityVector;
+    }
+
     public void SetDirection(Vector2 direction)
     {
         rb.velocity = direction.normalized * speed;
     }
-
     void OnEnable()
     {
         Invoke("Deactivate", lifeTime);

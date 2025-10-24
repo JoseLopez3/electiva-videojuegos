@@ -25,9 +25,8 @@ public class EnemyAI : MonoBehaviour
     void Start()
     {
         currentHealth = maxHealth;
-        GameManager.Instance.RegisterEnemy(this);
         UpdateHealthBar();
-        SwitchToPhase(0); 
+        // SwitchToPhase(0); 
     }
 
     void Update()
@@ -45,14 +44,22 @@ public class EnemyAI : MonoBehaviour
     }
     
     void CheckForPhaseSwitch()
+{
+    // Si ya estamos en la última fase, no hay más cambios que hacer.
+    if (currentPhaseIndex == attackPhases.Count - 1) return;
+
+    float gameTimeLeft = GameManager.Instance.GetCurrentTime();
+    
+    // El índice de la siguiente fase potencial que vamos a comprobar.
+    // Si estamos inactivos (índice -1), la siguiente fase es la 0.
+    int nextPhaseIndexToCheck = currentPhaseIndex + 1;
+
+    // Comprobamos si el tiempo ha alcanzado el trigger de la siguiente fase.
+    if (gameTimeLeft <= attackPhases[nextPhaseIndexToCheck].triggerTimeInSeconds)
     {
-        if (currentPhaseIndex + 1 >= attackPhases.Count) return;
-        float gameTimeLeft = GameManager.Instance.GetCurrentTime();
-        if (gameTimeLeft <= attackPhases[currentPhaseIndex + 1].triggerTimeInSeconds)
-        {
-            SwitchToPhase(currentPhaseIndex + 1);
-        }
+        SwitchToPhase(nextPhaseIndexToCheck);
     }
+}
 
     void SwitchToPhase(int phaseIndex)
     {
@@ -160,12 +167,15 @@ public class EnemyAI : MonoBehaviour
             bulletScript.damageAmount = bulletDamage;
             Quaternion rotation = Quaternion.Euler(0, 0, angle);
             Vector2 direction = rotation * Vector2.up;
-            bulletScript.SetDirection(direction * speed); // Simplificado, ya que la velocidad está en el vector
+            Vector2 finalVelocity = direction * speed; 
+    
+            // Y se lo pasamos a la bala
+            bulletScript.SetVelocity(finalVelocity);
         }
     }
     
     // El resto de los métodos (DealDamage, Die, UpdateHealthBar) no cambian.
     public void DealDamage(int damage) { currentHealth -= damage; UpdateHealthBar(); if (currentHealth <= 0) Die(); }
-    private void Die() { GameManager.Instance.UnregisterEnemy(this); gameObject.SetActive(false); }
+    private void Die() {  GameEvents.EnemyDied(); gameObject.SetActive(false); }
     private void UpdateHealthBar() { if(healthBar != null) { healthBar.maxValue = maxHealth; healthBar.value = currentHealth; } }
 }

@@ -16,7 +16,7 @@ MonoBehaviour:
   numberOfProjectiles: 5
   projectileSpeed: 8
   timeBetweenBursts: 2.5
-  startAngleOffset: 30
+  startAngleOffset: 180
   angleStep: 10
   timeBetweenShots: 0.4
   burstCount: 3

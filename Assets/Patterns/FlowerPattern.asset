@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   patternType: 4
   numberOfProjectiles: 80
-  projectileSpeed: 4
+  projectileSpeed: 8
   timeBetweenBursts: 4
   startAngleOffset: 0
   angleStep: 5

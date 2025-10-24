@@ -34,8 +34,8 @@ public class MovementPhisic : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
-        GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
-
+        // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+        GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
         originalFireRate = fireRate;
     }
 
@@ -55,8 +55,8 @@ public class MovementPhisic : MonoBehaviour
 
 
         currentHealth -= damage;
-        GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
-
+        // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+        GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
         if(currentHealth <= 0){
             Debug.Log("Fin del juego");
 
@@ -73,8 +73,8 @@ public class MovementPhisic : MonoBehaviour
             float deactivetObjectDuration = 1.7f;
 
             Invoke("DeactivateObject",deactivetObjectDuration);
-            GameManager.Instance.GameOver(false);
-
+            // GameManager.Instance.GameOver(false);
+            GameEvents.GameOver(false);
         }
     }
 
@@ -192,7 +192,8 @@ public void Heal(int amount)
         currentHealth = maxHealth;
     }
     Debug.Log("Jugador curado! Vida actual: " + currentHealth);
-    GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+    // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
+    GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
 }
 
 public void ApplyAttackSpeedBuff(float multiplier, float duration)

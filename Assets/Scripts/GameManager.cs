@@ -24,8 +24,39 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject pauseMenuPanel;
     [SerializeField] private GameObject gameOverMenuPanel;
     [SerializeField] private TextMeshProUGUI endGameText;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip levelMusic;
     
     private bool isPaused = false;
+
+    private void OnEnable()
+    {
+        // Suscribirse a todos los eventos que le importan
+        GameEvents.OnPlayerHealthChanged += UpdatePlayerHealthUI;
+        GameEvents.OnEnemyDied += OnEnemyDied;
+        GameEvents.OnGameOver += HandleGameOver;
+    }
+
+    private void OnDisable()
+    {
+        // MUY IMPORTANTE: Desuscribirse para evitar errores
+        GameEvents.OnPlayerHealthChanged -= UpdatePlayerHealthUI;
+        GameEvents.OnEnemyDied -= OnEnemyDied;
+        GameEvents.OnGameOver -= HandleGameOver;
+    }
+
+    private void OnEnemyDied()
+    {
+        // Eliminamos el primer enemigo nulo/inactivo que encontremos
+        activeEnemies.RemoveAll(enemy => enemy == null || !enemy.gameObject.activeInHierarchy);
+        Debug.Log("activeEnemies '" + activeEnemies.Count );
+
+        if (activeEnemies.Count == 1 && !isGameOver)
+        {
+            GameEvents.GameOver(true); // Anuncia victoria
+        }
+    }
 
     private void Awake()
     {
@@ -36,6 +67,12 @@ public class GameManager : MonoBehaviour
     {
         currentTime = startTime;
         Time.timeScale = 1; // Se asegura de que el juego no esté pausado al empezar
+        activeEnemies = new List<EnemyAI>(FindObjectsOfType<EnemyAI>());
+        if (AudioManager.Instance != null && levelMusic != null)
+        {
+            AudioManager.Instance.PlayMusic(levelMusic);
+        }
+
     }
 
     void Update()
@@ -56,7 +93,7 @@ public class GameManager : MonoBehaviour
         if (currentTime <= 0)
         {
             currentTime = 0;
-            GameOver(false); // Se acabo el tiempo, el jugador pierde
+            GameEvents.GameOver(false); // Se acabo el tiempo, el jugador pierde
         }
         
         // Formateo del tiempo
@@ -81,7 +118,11 @@ public void TogglePause()
     if (isPaused)
     {
         Time.timeScale = 0f; // Pausamos el juego
-
+        // --- PAUSA LA MÚSICA ---
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PauseMusic();
+        }
         // Preparamos el panel para la animación de entrada
         pauseMenuPanel.transform.localScale = Vector3.zero; // Lo hacemos invisible al instante
         pauseMenuPanel.SetActive(true); // Lo activamos para poder animarlo
@@ -101,6 +142,11 @@ public void TogglePause()
                 // Esto se ejecuta CUANDO la animación TERMINA
                 pauseMenuPanel.SetActive(false); // Ahora sí lo desactivamos
                 Time.timeScale = 1f; // Reanudamos el juego
+                // --- REANUDA LA MÚSICA ---
+                 if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.UnpauseMusic();
+                }
             });
     }
 }
@@ -135,7 +181,7 @@ public void QuitToMenuWithAnimation()
         });
 }
 
-    public void GameOver(bool playerWon)
+    private void HandleGameOver(bool playerWon)
     {
         if (isGameOver) return; 
         
@@ -177,25 +223,28 @@ public void QuitToMenuWithAnimation()
     }
     
     //Metodos de UI y enemigos
-    public void UpdatePlayerHealthUI(int currentHealth, int maxHealth)
+    private void UpdatePlayerHealthUI(int currentHealth, int maxHealth)
     {
         playerHealthBar.maxValue = maxHealth;
         playerHealthBar.value = currentHealth;
     }
 
-    public void RegisterEnemy(EnemyAI enemy)
-    {
-        activeEnemies.Add(enemy);
-    }
+    // public void RegisterEnemy(EnemyAI enemy)
+    // {
+    //     activeEnemies.Add(enemy);
+    // }
 
-    public void UnregisterEnemy(EnemyAI enemy)
-    {
-        activeEnemies.Remove(enemy);
-        if (activeEnemies.Count == 0 && !isGameOver)
-        {
-            GameOver(true); // Todos los enemigos derrotados, el jugador gana
-        }
-    }
+    // public void UnregisterEnemy(EnemyAI enemy)
+    // {
+    //     activeEnemies.Remove(enemy);
+    //     Debug.Log("activeEnemies '" + activeEnemies.Count );
+    // Debug.Log("isGameOver '" + !isGameOver );
+
+    //     if (activeEnemies.Count == 0 && !isGameOver)
+    //     {
+    //         GameEvents.GameOver(true); // Todos los enemigos derrotados, el jugador gana
+    //     }
+    // }
 
     public float GetCurrentTime()
     {
