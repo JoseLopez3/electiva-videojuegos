@@ -3,7 +3,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public float speed = 20f;
-    public float lifeTime = 20f;
+    public float lifeTime = 650f;
     public int damageAmount; 
     private Rigidbody2D rb;
     
@@ -35,6 +35,8 @@ public class Bullet : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("Bala impactada con " + collision.gameObject.name);
+
         // Se obtiene el script del enemigo del objeto con el que chocamos y posteriormente del jugador.
         EnemyAI enemy = collision.GetComponent<EnemyAI>();
         if (enemy != null)

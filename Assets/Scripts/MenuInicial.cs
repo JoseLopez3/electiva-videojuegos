@@ -10,6 +10,14 @@ public class MenuInicial : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
+    public void play_level2(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 2);
+    }
+
+    public void play_level3(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 3);
+    }
+
      public void MostrarMenuOpciones()
     {
         principalMenu.SetActive(false); 

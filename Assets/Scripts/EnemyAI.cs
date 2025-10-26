@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening; // Asegúrate de tener DOTween importado
 
 public class EnemyAI : MonoBehaviour
 {
@@ -16,21 +17,69 @@ public class EnemyAI : MonoBehaviour
     private int currentHealth;
     [SerializeField] private Slider healthBar;
 
+    [Header("Visuals - NEW")]
+    [SerializeField] private SpriteRenderer spriteRenderer; // Referencia al SpriteRenderer del enemigo
+    [SerializeField] private Color deathColor = Color.red; // Color al "morir" visualmente
+    private Color originalColor;
+    public bool isVisuallyDead { get; private set; } = false; // Estado si el enemigo está "muerto visualmente"
+    public bool hasDiedCompletely { get; private set; } = false; // Estado si el enemigo ha sido completamente procesado para desactivación.
+
     private int currentPhaseIndex = -1;
     private BulletPatternSO currentPattern;
     private float nextFireTime = 0f;
     private float currentSpiralAngle = 0f;
     private bool isShooting = false; // Bloqueo para evitar que las corrutinas se solapen
 
-    void Start()
+    void Awake()
+    {
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                Debug.LogError("EnemyAI: No se encontró SpriteRenderer en el GameObject o no está asignado. Asigna uno en el Inspector.");
+            }
+        }
+        originalColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+    }
+
+    void OnEnable()
     {
         currentHealth = maxHealth;
         UpdateHealthBar();
-        // SwitchToPhase(0); 
+        isVisuallyDead = false;
+        hasDiedCompletely = false;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = originalColor; // Restaurar color original al activarse
+        }
+        
+        // Asegúrate de resetear el estado de los patrones de disparo
+        currentPhaseIndex = -1; 
+        nextFireTime = 0f; 
+        StopAllCoroutines(); // Detiene cualquier corrutina de disparo antigua
+        isShooting = false;
+
+        // Resetear la colisión y barra de vida por si se reutiliza del pool
+        Collider2D collider = GetComponent<Collider2D>();
+        if (collider != null) collider.enabled = true;
+        if (healthBar != null) healthBar.gameObject.SetActive(true);
+
+        GameManager.Instance?.RegisterEnemy(this);
+        Debug.Log($"Enemigo {name} activado y registrado. Salud: {currentHealth}");
+    }
+
+    void OnDisable()
+    {
+        GameManager.Instance?.UnregisterEnemy(this);
+        DOTween.Kill(spriteRenderer); // Detener animaciones de DOTween
+        Debug.Log($"Enemigo {name} desactivado y desregistrado.");
     }
 
     void Update()
     {
+        // La lógica de CheckForPhaseSwitch y disparo AÚN SE EJECUTA
+        // incluso si el enemigo está isVisuallyDead, porque ahora debe seguir atacando.
         CheckForPhaseSwitch();
 
         if (Time.time >= nextFireTime && !isShooting)
@@ -44,22 +93,18 @@ public class EnemyAI : MonoBehaviour
     }
     
     void CheckForPhaseSwitch()
-{
-    // Si ya estamos en la última fase, no hay más cambios que hacer.
-    if (currentPhaseIndex == attackPhases.Count - 1) return;
-
-    float gameTimeLeft = GameManager.Instance.GetCurrentTime();
-    
-    // El índice de la siguiente fase potencial que vamos a comprobar.
-    // Si estamos inactivos (índice -1), la siguiente fase es la 0.
-    int nextPhaseIndexToCheck = currentPhaseIndex + 1;
-
-    // Comprobamos si el tiempo ha alcanzado el trigger de la siguiente fase.
-    if (gameTimeLeft <= attackPhases[nextPhaseIndexToCheck].triggerTimeInSeconds)
     {
-        SwitchToPhase(nextPhaseIndexToCheck);
+        if (currentPhaseIndex == attackPhases.Count - 1) return;
+        if (GameManager.Instance == null) return; 
+
+        float gameTimeLeft = GameManager.Instance.GetCurrentTime();
+        int nextPhaseIndexToCheck = currentPhaseIndex + 1;
+
+        if (nextPhaseIndexToCheck < attackPhases.Count && gameTimeLeft <= attackPhases[nextPhaseIndexToCheck].triggerTimeInSeconds)
+        {
+            SwitchToPhase(nextPhaseIndexToCheck);
+        }
     }
-}
 
     void SwitchToPhase(int phaseIndex)
     {
@@ -115,9 +160,9 @@ public class EnemyAI : MonoBehaviour
 
             case BulletPatternSO.PatternType.SequentialBurst:
                 float currentBurstAngle = pattern.startAngleOffset - (pattern.angleBetweenBursts * (pattern.burstCount -1) / 2f);
-                for(int i = 0; i < pattern.burstCount; i++) // Este bucle controla las 3 ráfagas principales
+                for(int i = 0; i < pattern.burstCount; i++)
                 {
-                    for(int j = 0; j < pattern.numberOfProjectiles; j++) // Este bucle controla las 5 balas de CADA ráfaga
+                    for(int j = 0; j < pattern.numberOfProjectiles; j++)
                     {
                         float projectileAngle;
                         if (pattern.numberOfProjectiles > 1 && pattern.angleSpread > 0)
@@ -126,13 +171,9 @@ public class EnemyAI : MonoBehaviour
                             projectileAngle = currentBurstAngle;
                         
                         SpawnBullet(projectileAngle, pattern.projectileSpeed);
-
-                        // ¡AQUÍ ESTÁ LA LÍNEA MÁGICA!
-                        // Añadimos una pequeña pausa después de CADA bala.
                         yield return new WaitForSeconds(pattern.timeBetweenProjectilesInBurst); 
                     }
                     currentBurstAngle += pattern.angleBetweenBursts;
-                    // Esta pausa es para esperar entre una ráfaga y la siguiente (ej. entre la de 0° y la de 30°)
                     yield return new WaitForSeconds(pattern.timeBetweenShots);
                 }
                 break;
@@ -145,9 +186,7 @@ public class EnemyAI : MonoBehaviour
                     for(int j = 0; j < pattern.petals; j++)
                     {
                         float petalBaseAngle = j * anglePerPetal;
-                        // Espiral 1 (sentido horario)
                         SpawnBullet(petalBaseAngle + currentSpiralAngle, pattern.projectileSpeed);
-                        // Espiral 2 (sentido anti-horario)
                         SpawnBullet(petalBaseAngle - currentSpiralAngle, pattern.projectileSpeed);
                     }
                     yield return new WaitForSeconds(pattern.timeBetweenShots);
@@ -169,13 +208,89 @@ public class EnemyAI : MonoBehaviour
             Vector2 direction = rotation * Vector2.up;
             Vector2 finalVelocity = direction * speed; 
     
-            // Y se lo pasamos a la bala
             bulletScript.SetVelocity(finalVelocity);
         }
     }
     
-    // El resto de los métodos (DealDamage, Die, UpdateHealthBar) no cambian.
-    public void DealDamage(int damage) { currentHealth -= damage; UpdateHealthBar(); if (currentHealth <= 0) Die(); }
-    private void Die() {  GameEvents.EnemyDied(); gameObject.SetActive(false); }
-    private void UpdateHealthBar() { if(healthBar != null) { healthBar.maxValue = maxHealth; healthBar.value = currentHealth; } }
+    public void DealDamage(int damage)
+    {
+        if (hasDiedCompletely) return; // Si ya ha sido desactivado, no recibe más daño
+
+        currentHealth -= damage;
+        UpdateHealthBar();
+        if (currentHealth <= 0 && !isVisuallyDead) // Si la vida llega a 0 y aún no está visualmente muerto
+        {
+            DieVisual(); // Llama al nuevo método de muerte visual
+        }
+    }
+
+    private void DieVisual() // NUEVO MÉTODO PARA LA "MUERTE VISUAL"
+    {
+        if (isVisuallyDead) return; // Evitar procesar dos veces la muerte visual
+
+        isVisuallyDead = true;
+        Debug.Log($"Enemigo {name} ha llegado a 0 HP y está visualmente muerto.");
+        GameEvents.EnemyVisuallyDied(this); // Notifica al GameManager
+
+        // Cambiar a color rojo fijo, sin animación de flash si quieres que sea instantáneo y permanente
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = deathColor;
+        }
+
+        // Opcional: Desactivar la barra de vida cuando está "muerto"
+        if (healthBar != null) healthBar.gameObject.SetActive(false);
+
+        // Opcional: Desactivar colisiones para que las balas no lo golpeen más (pero el jugador sí podría atravesarlo)
+        // Collider2D collider = GetComponent<Collider2D>();
+        // if (collider != null) collider.enabled = false;
+        
+        // IMPORTANTE: NO detener corrutinas de disparo ni deshabilitar este script aquí.
+        // El enemigo DEBE seguir atacando.
+    }
+
+    // Método que el GameManager llamará cuando sea el momento de desactivar por completo
+    public void DeactivateCompletely()
+    {
+        if (hasDiedCompletely) return;
+
+        hasDiedCompletely = true;
+        Debug.Log($"Enemigo {name} desactivado completamente.");
+        gameObject.SetActive(false); // Ahora sí, se desactiva
+        // GameEvents.EnemyDeactivatedCompletely(); // Este evento ya no es estrictamente necesario, el GM ya lo sabe por la lista.
+    }
+
+    private void UpdateHealthBar()
+    {
+        if(healthBar != null)
+        {
+            healthBar.maxValue = maxHealth;
+            healthBar.value = currentHealth;
+            // Solo muestra la barra de vida si no está visualmente muerto y tiene menos de maxHealth
+            healthBar.gameObject.SetActive(!isVisuallyDead && currentHealth < maxHealth);
+        }
+    }
+
+    // Este método se llama desde el ObjectPooler al sacar un enemigo para reutilizarlo
+    public void ResetEnemy()
+    {
+        currentHealth = maxHealth;
+        isVisuallyDead = false;
+        hasDiedCompletely = false;
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = originalColor;
+        }
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(true); // Asegúrate de reactivar la barra de vida
+        }
+        Collider2D collider = GetComponent<Collider2D>();
+        if (collider != null) collider.enabled = true; // Reactivar colisiones
+        currentPhaseIndex = -1;
+        StopAllCoroutines();
+        isShooting = false;
+        nextFireTime = 0f;
+        currentSpiralAngle = 0f;
+    }
 }

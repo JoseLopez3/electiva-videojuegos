@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: FlowerPattern
   m_EditorClassIdentifier: 
   patternType: 4
-  numberOfProjectiles: 80
-  projectileSpeed: 8
+  numberOfProjectiles: 5
+  projectileSpeed: 4
   timeBetweenBursts: 4
   startAngleOffset: 0
   angleStep: 5

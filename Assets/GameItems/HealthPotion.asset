@@ -15,6 +15,6 @@ MonoBehaviour:
   itemName: "Poci\xF3n de vida"
   icon: {fileID: 21300000, guid: fc204e0b1be472e43be7844cdf2cbefc, type: 3}
   itemType: 0
-  healthToRestore: 2
+  healthToRestore: 10
   speedMultiplier: 1.5
   duration: 5

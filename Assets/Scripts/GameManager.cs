@@ -16,7 +16,8 @@ public class GameManager : MonoBehaviour
     private bool isGameOver = false;
 
     [Header("Enemy Tracking")]
-    private List<EnemyAI> activeEnemies = new List<EnemyAI>();
+    private List<EnemyAI> allEnemiesInScene = new List<EnemyAI>(); 
+    private List<EnemyAI> visuallyDeadEnemies = new List<EnemyAI>(); 
 
     [Header("UI References")]
     [SerializeField] private Slider playerHealthBar;
@@ -32,47 +33,86 @@ public class GameManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Suscribirse a todos los eventos que le importan
         GameEvents.OnPlayerHealthChanged += UpdatePlayerHealthUI;
-        GameEvents.OnEnemyDied += OnEnemyDied;
+        GameEvents.OnEnemyVisuallyDied += OnEnemyVisuallyDiedHandler;
         GameEvents.OnGameOver += HandleGameOver;
     }
 
     private void OnDisable()
     {
-        // MUY IMPORTANTE: Desuscribirse para evitar errores
         GameEvents.OnPlayerHealthChanged -= UpdatePlayerHealthUI;
-        GameEvents.OnEnemyDied -= OnEnemyDied;
+        GameEvents.OnEnemyVisuallyDied -= OnEnemyVisuallyDiedHandler;
         GameEvents.OnGameOver -= HandleGameOver;
     }
 
-    private void OnEnemyDied()
+    private void OnEnemyVisuallyDiedHandler(EnemyAI enemy)
     {
-        // Eliminamos el primer enemigo nulo/inactivo que encontremos
-        activeEnemies.RemoveAll(enemy => enemy == null || !enemy.gameObject.activeInHierarchy);
-        Debug.Log("activeEnemies '" + activeEnemies.Count );
-
-        if (activeEnemies.Count == 1 && !isGameOver)
+        if (enemy != null && enemy.isVisuallyDead && !visuallyDeadEnemies.Contains(enemy))
         {
-            GameEvents.GameOver(true); // Anuncia victoria
+            visuallyDeadEnemies.Add(enemy);
+            Debug.Log($"Enemigo '{enemy.name}' ahora está visualmente muerto. Total visualmente muertos: {visuallyDeadEnemies.Count}");
+            CheckWinCondition();
         }
     }
 
+    private void CheckWinCondition()
+    {
+        if (visuallyDeadEnemies.Count == allEnemiesInScene.Count && !isGameOver)
+        {
+            Debug.Log("¡Todos los enemigos han muerto visualmente! Procediendo a la victoria.");
+            isGameOver = true;
+            StartCoroutine(DeactivateAllVisuallyDeadEnemiesAndWin());
+        }
+    }
+
+    private IEnumerator DeactivateAllVisuallyDeadEnemiesAndWin()
+    {
+        yield return new WaitForSeconds(1.5f); 
+
+        // --- CORRECCIÓN AQUÍ: Crear una copia de la lista antes de iterar ---
+        List<EnemyAI> enemiesToDeactivate = new List<EnemyAI>(visuallyDeadEnemies);
+
+        foreach (EnemyAI enemy in enemiesToDeactivate) // Iterar sobre la COPIA
+        {
+            if (enemy != null && enemy.gameObject.activeInHierarchy && !enemy.hasDiedCompletely)
+            {
+                enemy.DeactivateCompletely(); 
+            }
+        }
+        
+        GameEvents.GameOver(true);
+    }
+
+
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Start()
     {
         currentTime = startTime;
-        Time.timeScale = 1; // Se asegura de que el juego no esté pausado al empezar
-        activeEnemies = new List<EnemyAI>(FindObjectsOfType<EnemyAI>());
+        Time.timeScale = 1;
+
+        allEnemiesInScene.Clear();
+        visuallyDeadEnemies.Clear();
+        // Asegurarse de que esta línea se ejecuta DESPUÉS de que todos los enemigos se hayan inicializado
+        // Si los enemigos se generan dinámicamente o salen de un pool al inicio, esta lista debe actualizarse.
+        allEnemiesInScene.AddRange(FindObjectsOfType<EnemyAI>(true)); 
+
+        Debug.Log($"GameManager inició. Total de enemigos detectados en escena: {allEnemiesInScene.Count}");
+
         if (AudioManager.Instance != null && levelMusic != null)
         {
             AudioManager.Instance.PlayMusic(levelMusic);
         }
-
     }
 
     void Update()
@@ -93,10 +133,9 @@ public class GameManager : MonoBehaviour
         if (currentTime <= 0)
         {
             currentTime = 0;
-            GameEvents.GameOver(false); // Se acabo el tiempo, el jugador pierde
+            GameEvents.GameOver(false); 
         }
         
-        // Formateo del tiempo
         int minutes = Mathf.FloorToInt(currentTime / 60);
         int seconds = Mathf.FloorToInt(currentTime % 60);
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
@@ -110,81 +149,65 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- CÓDIGO NUEVO CON DOTWEEN (DESPUÉS) ---
-public void TogglePause()
-{
-    isPaused = !isPaused;
-
-    if (isPaused)
+    public void TogglePause()
     {
-        Time.timeScale = 0f; // Pausamos el juego
-        // --- PAUSA LA MÚSICA ---
-        if (AudioManager.Instance != null)
+        isPaused = !isPaused;
+
+        if (isPaused)
         {
-            AudioManager.Instance.PauseMusic();
+            Time.timeScale = 0f;
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PauseMusic();
+            }
+            pauseMenuPanel.transform.localScale = Vector3.zero;
+            pauseMenuPanel.SetActive(true);
+            pauseMenuPanel.transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack).SetUpdate(true);
         }
-        // Preparamos el panel para la animación de entrada
-        pauseMenuPanel.transform.localScale = Vector3.zero; // Lo hacemos invisible al instante
-        pauseMenuPanel.SetActive(true); // Lo activamos para poder animarlo
-
-        // Creamos la animación de escalado para que aparezca
-        pauseMenuPanel.transform.DOScale(1f, 0.3f)
-            .SetEase(Ease.OutBack) // Un efecto de "rebote" muy agradable
-            .SetUpdate(true); // ¡MUY IMPORTANTE! Para que la animación funcione aunque el juego esté pausado (Time.timeScale = 0)
+        else
+        {
+            pauseMenuPanel.transform.DOScale(0f, 0.2f)
+                .SetEase(Ease.InBack)
+                .SetUpdate(true)
+                .OnComplete(() => {
+                    pauseMenuPanel.SetActive(false);
+                    Time.timeScale = 1f;
+                    if (AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.UnpauseMusic();
+                    }
+                });
+        }
     }
-    else
+
+    public void RestartGameWithAnimation()
     {
-        // Creamos la animación para que se encoja y desaparezca
         pauseMenuPanel.transform.DOScale(0f, 0.2f)
-            .SetEase(Ease.InBack) // El efecto de rebote inverso
-            .SetUpdate(true) // También necesita esto para funcionar
+            .SetEase(Ease.InBack)
+            .SetUpdate(true)
             .OnComplete(() => {
-                // Esto se ejecuta CUANDO la animación TERMINA
-                pauseMenuPanel.SetActive(false); // Ahora sí lo desactivamos
-                Time.timeScale = 1f; // Reanudamos el juego
-                // --- REANUDA LA MÚSICA ---
-                 if (AudioManager.Instance != null)
-                {
-                    AudioManager.Instance.UnpauseMusic();
-                }
+                Time.timeScale = 1f;
+                RestartGame();
             });
     }
-}
 
-// Añade este nuevo método a tu GameManager.cs
-
-public void RestartGameWithAnimation()
-{
-    // Animamos el menú para que se encoja y desaparezca
-    pauseMenuPanel.transform.DOScale(0f, 0.2f)
-        .SetEase(Ease.InBack)
-        .SetUpdate(true)
-        .OnComplete(() => {
-            // Cuando la animación termina, reiniciamos el juego
-            Time.timeScale = 1f; // ¡Muy importante restaurar el tiempo antes de cambiar de escena!
-            RestartGame(); // Llamamos a tu método original de reinicio
-        });
-}
-
-// Puedes crear otro método similar para volver al menú principal
-public void QuitToMenuWithAnimation()
-{
-    // Animamos el menú para que se encoja y desaparezca
-    pauseMenuPanel.transform.DOScale(0f, 0.2f)
-        .SetEase(Ease.InBack)
-        .SetUpdate(true)
-        .OnComplete(() => {
-            // Cuando la animación termina, volvemos al menú
-            Time.timeScale = 1f;
-            // Aquí iría tu lógica para cargar la escena del menú principal, por ejemplo:
-            // SceneManager.LoadScene("MainMenu"); 
-        });
-}
+    public void QuitToMenuWithAnimation()
+    {
+        pauseMenuPanel.transform.DOScale(0f, 0.2f)
+            .SetEase(Ease.InBack)
+            .SetUpdate(true)
+            .OnComplete(() => {
+                Time.timeScale = 1f;
+                SceneManager.LoadScene(0); 
+            });
+    }
 
     private void HandleGameOver(bool playerWon)
     {
-        if (isGameOver) return; 
-        
+        if (isGameOver && playerWon) 
+        {
+            if (endGameText.text == "¡VICTORIA!" && playerWon) return; 
+        }
         
         isGameOver = true;
         Time.timeScale = 0f;
@@ -194,23 +217,19 @@ public void QuitToMenuWithAnimation()
         if (playerWon)
         {
             endGameText.text = "¡VICTORIA!";
+            if (AudioManager.Instance != null) AudioManager.Instance.StopMusic(); 
         }
         else
         {
             endGameText.text = "DERROTA";
+            if (AudioManager.Instance != null) AudioManager.Instance.StopMusic(); 
         }
 
-        // Preparamos el panel para la animación de entrada
-    gameOverMenuPanel.transform.localScale = Vector3.zero; // Lo hacemos invisible al instante
-    gameOverMenuPanel.SetActive(true); // Lo activamos para poder animarlo
-
-    // Creamos la animación de escalado para que aparezca
-    gameOverMenuPanel.transform.DOScale(1f, 0.5f) // Le damos un poco más de tiempo para que sea más dramático
-        .SetEase(Ease.OutElastic) // Un efecto elástico es genial para pantallas de fin de nivel
-        .SetUpdate(true); // Para que la animación funcione con Time.timeScale = 0
+        gameOverMenuPanel.transform.localScale = Vector3.zero;
+        gameOverMenuPanel.SetActive(true);
+        gameOverMenuPanel.transform.DOScale(1f, 0.5f).SetEase(Ease.OutElastic).SetUpdate(true);
     }
 
-    //Metodos para botones
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -222,29 +241,27 @@ public void QuitToMenuWithAnimation()
         Application.Quit();
     }
     
-    //Metodos de UI y enemigos
     private void UpdatePlayerHealthUI(int currentHealth, int maxHealth)
     {
         playerHealthBar.maxValue = maxHealth;
         playerHealthBar.value = currentHealth;
     }
 
-    // public void RegisterEnemy(EnemyAI enemy)
-    // {
-    //     activeEnemies.Add(enemy);
-    // }
+    public void RegisterEnemy(EnemyAI enemy)
+    {
+        if (!allEnemiesInScene.Contains(enemy))
+        {
+            allEnemiesInScene.Add(enemy);
+            Debug.Log($"Enemigo registrado: {enemy.name}. Total: {allEnemiesInScene.Count}");
+        }
+    }
 
-    // public void UnregisterEnemy(EnemyAI enemy)
-    // {
-    //     activeEnemies.Remove(enemy);
-    //     Debug.Log("activeEnemies '" + activeEnemies.Count );
-    // Debug.Log("isGameOver '" + !isGameOver );
-
-    //     if (activeEnemies.Count == 0 && !isGameOver)
-    //     {
-    //         GameEvents.GameOver(true); // Todos los enemigos derrotados, el jugador gana
-    //     }
-    // }
+    public void UnregisterEnemy(EnemyAI enemy)
+    {
+        allEnemiesInScene.Remove(enemy); 
+        visuallyDeadEnemies.Remove(enemy); // Esto es seguro ya que Remove no falla si el elemento no está.
+        Debug.Log($"Enemigo desregistrado: {enemy.name}. Total activos restantes: {allEnemiesInScene.Count}. Visualmente muertos: {visuallyDeadEnemies.Count}");
+    }
 
     public float GetCurrentTime()
     {
