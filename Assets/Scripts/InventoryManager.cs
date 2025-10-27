@@ -25,7 +25,7 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
-        // Encontramos la referencia al jugador para poder aplicarle los efectos
+        // la referencia al jugador para poder aplicarle los efectos
         playerMovement = FindObjectOfType<MovementPhisic>();
         GameEvents.HotbarUpdated();
     }
@@ -44,12 +44,10 @@ public class InventoryManager : MonoBehaviour
         if (items.Count >= hotbarSize - 1)
         {
             Debug.Log("Inventario lleno!");
-            return; // Simplemente no lo añade
+            return;
         }
 
         items.Add(item);
-        // ANTES: UpdateHotbarUI();
-        // AHORA: Anunciamos el cambio
         GameEvents.HotbarUpdated();
     }
 
@@ -58,13 +56,12 @@ public class InventoryManager : MonoBehaviour
         if (slotIndex >= items.Count || items[slotIndex] == null)
         {
             Debug.Log("Slot vacío.");
-            return; // No hay item en ese slot
+            return; 
         }
 
         ConsumableItem itemToUse = items[slotIndex];
         Debug.Log("Usando item: " + itemToUse.itemName);
 
-        // Lógica para aplicar el efecto del item
         switch (itemToUse.itemType)
         {
             case ConsumableItem.ItemType.HealthPotion:

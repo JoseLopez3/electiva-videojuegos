@@ -8,11 +8,10 @@ public class ItemPickup : MonoBehaviour
 
    private void Start()
 {
-    // --- LÍNEAS DE DEPURACIÓN ---
     if (item == null)
     {
         Debug.LogError("ERROR: ¡No hay ningún ConsumableItem asignado en el Inspector de " + gameObject.name + "!");
-        return; // Detenemos la ejecución para evitar más errores
+        return; 
     }
 
     if (item.icon == null)
@@ -23,7 +22,6 @@ public class ItemPickup : MonoBehaviour
     {
         Debug.Log("ÉXITO: Asignando el sprite '" + item.icon.name + "' al objeto " + gameObject.name);
     }
-    // --- FIN LÍNEAS DE DEPURACIÓN ---
 
     // Asigna el sprite del item al objeto en la escena para que se vea correcto
     GetComponent<SpriteRenderer>().sprite = item.icon;
@@ -33,11 +31,9 @@ public class ItemPickup : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            // Intenta añadir el item al inventario (que crearemos ahora)
-            // bool wasPickedUp = InventoryManager.Instance.AddItem(item);
+            
             GameEvents.ItemPickedUp(item); // Anuncia que se intentó recoger un item
-        // El InventoryManager decidirá si puede o no añadirlo.
-            Destroy(gameObject); // Asumimos que siempre se recoge.
+            Destroy(gameObject); // se asume que siempre se recoge.
         }
     }
 }

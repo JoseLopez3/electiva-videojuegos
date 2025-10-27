@@ -9,6 +9,12 @@ public static class GameEvents
         OnPlayerHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
+    public static event Action OnPlayerTookDamage;
+    public static void PlayerTookDamage()
+    {
+        OnPlayerTookDamage?.Invoke();
+    }
+
     public static event Action<EnemyAI> OnEnemyVisuallyDied;
     public static void EnemyVisuallyDied(EnemyAI enemy)
     {
@@ -21,13 +27,11 @@ public static class GameEvents
         OnEnemyDeactivatedCompletely?.Invoke();
     }
     
-    // --- CORRECCIÓN AQUÍ: El evento OnGameOver debe ser de tipo Action<bool> ---
-    public static event Action<bool> OnGameOver; // <-- ¡Cambiado a Action<bool>!
+    public static event Action<bool> OnGameOver; 
     public static void GameOver(bool playerWon)
     {
         OnGameOver?.Invoke(playerWon);
     }
-    // ----------------------------------------------------------------------
 
     public static event Action<ConsumableItem> OnItemPickedUp;
     public static void ItemPickedUp(ConsumableItem item)

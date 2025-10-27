@@ -7,7 +7,7 @@ public class ConsumableItem : ScriptableObject
 {
     public string itemName = "New Item";
     public Sprite icon = null; // El ícono que se mostrará en la hotbar
-    public enum ItemType { HealthPotion, AttackSpeedStar } // Los tipos de objetos que existen
+    public enum ItemType { HealthPotion, AttackSpeedStar } 
     public ItemType itemType;
 
     // Valores específicos para cada tipo de objeto
@@ -15,6 +15,6 @@ public class ConsumableItem : ScriptableObject
     public int healthToRestore = 25;
 
     [Header("Attack Speed Star")]
-    public float speedMultiplier = 1.5f; // Aumenta la velocidad de ataque en un 50%
-    public float duration = 5f;          // Durante 5 segundos
+    public float speedMultiplier = 1.5f; 
+    public float duration = 5f;          
 }

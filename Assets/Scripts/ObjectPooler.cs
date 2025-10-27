@@ -43,7 +43,6 @@ public class ObjectPooler : MonoBehaviour
 
     public GameObject SpawnFromPool(string tag, Vector3 position, Quaternion rotation)
     {
-        // Debug.Log("Bala impactada con "); // Este log parece estar fuera de lugar aquí, debería ser en Bullet.cs
 
         if (!poolDictionary.ContainsKey(tag))
         {
@@ -54,20 +53,18 @@ public class ObjectPooler : MonoBehaviour
         // Antes de reencolar, obtenemos el objeto que vamos a usar.
         GameObject objectToSpawn = poolDictionary[tag].Dequeue();
         
-        // --- NUEVO: Resetear el enemigo si es un EnemyAI ---
         EnemyAI enemy = objectToSpawn.GetComponent<EnemyAI>();
         if (enemy != null)
         {
             enemy.ResetEnemy(); // Llama al método de reseteo del enemigo
         }
-        // ----------------------------------------------------
 
         objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = position;
         objectToSpawn.transform.rotation = rotation;
 
         // Se vuelve a encolar el objeto para reutilizarlo.
-        poolDictionary[tag].Enqueue(objectToSpawn); // IMPORTANTE: El objeto ya está en uso, se encola para su FUTURA reutilización.
+        poolDictionary[tag].Enqueue(objectToSpawn); 
 
         return objectToSpawn;
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening; // Asegúrate de tener DOTween importado
+using DG.Tweening; 
 
 public class EnemyAI : MonoBehaviour
 {
@@ -28,7 +28,7 @@ public class EnemyAI : MonoBehaviour
     private BulletPatternSO currentPattern;
     private float nextFireTime = 0f;
     private float currentSpiralAngle = 0f;
-    private bool isShooting = false; // Bloqueo para evitar que las corrutinas se solapen
+    private bool isShooting = false; 
 
     void Awake()
     {
@@ -54,7 +54,6 @@ public class EnemyAI : MonoBehaviour
             spriteRenderer.color = originalColor; // Restaurar color original al activarse
         }
         
-        // Asegúrate de resetear el estado de los patrones de disparo
         currentPhaseIndex = -1; 
         nextFireTime = 0f; 
         StopAllCoroutines(); // Detiene cualquier corrutina de disparo antigua
@@ -78,8 +77,8 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-        // La lógica de CheckForPhaseSwitch y disparo AÚN SE EJECUTA
-        // incluso si el enemigo está isVisuallyDead, porque ahora debe seguir atacando.
+        // La lógica de CheckForPhaseSwitch y disparo aun se ejecutara
+        // incluso si el enemigo está en isVisuallyDead
         CheckForPhaseSwitch();
 
         if (Time.time >= nextFireTime && !isShooting)
@@ -224,29 +223,22 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    private void DieVisual() // NUEVO MÉTODO PARA LA "MUERTE VISUAL"
+    private void DieVisual() 
     {
-        if (isVisuallyDead) return; // Evitar procesar dos veces la muerte visual
+        if (isVisuallyDead) return; 
 
         isVisuallyDead = true;
         Debug.Log($"Enemigo {name} ha llegado a 0 HP y está visualmente muerto.");
         GameEvents.EnemyVisuallyDied(this); // Notifica al GameManager
 
-        // Cambiar a color rojo fijo, sin animación de flash si quieres que sea instantáneo y permanente
         if (spriteRenderer != null)
         {
             spriteRenderer.color = deathColor;
         }
 
-        // Opcional: Desactivar la barra de vida cuando está "muerto"
         if (healthBar != null) healthBar.gameObject.SetActive(false);
 
-        // Opcional: Desactivar colisiones para que las balas no lo golpeen más (pero el jugador sí podría atravesarlo)
-        // Collider2D collider = GetComponent<Collider2D>();
-        // if (collider != null) collider.enabled = false;
-        
-        // IMPORTANTE: NO detener corrutinas de disparo ni deshabilitar este script aquí.
-        // El enemigo DEBE seguir atacando.
+     
     }
 
     // Método que el GameManager llamará cuando sea el momento de desactivar por completo
@@ -256,8 +248,7 @@ public class EnemyAI : MonoBehaviour
 
         hasDiedCompletely = true;
         Debug.Log($"Enemigo {name} desactivado completamente.");
-        gameObject.SetActive(false); // Ahora sí, se desactiva
-        // GameEvents.EnemyDeactivatedCompletely(); // Este evento ya no es estrictamente necesario, el GM ya lo sabe por la lista.
+        gameObject.SetActive(false); 
     }
 
     private void UpdateHealthBar()
@@ -283,10 +274,10 @@ public class EnemyAI : MonoBehaviour
         }
         if (healthBar != null)
         {
-            healthBar.gameObject.SetActive(true); // Asegúrate de reactivar la barra de vida
+            healthBar.gameObject.SetActive(true); 
         }
         Collider2D collider = GetComponent<Collider2D>();
-        if (collider != null) collider.enabled = true; // Reactivar colisiones
+        if (collider != null) collider.enabled = true; 
         currentPhaseIndex = -1;
         StopAllCoroutines();
         isShooting = false;

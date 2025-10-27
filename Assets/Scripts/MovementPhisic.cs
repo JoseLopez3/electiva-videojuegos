@@ -6,9 +6,7 @@ public class MovementPhisic : MonoBehaviour
 {
     private float moveSpeed = 14f;
     public int maxHealth;
-    // public int totalDamage;
     private int currentHealth;
-    private int currentScore;
     private bool gameOver = false;
     private int moveX;
     private float originalFireRate;
@@ -20,10 +18,11 @@ public class MovementPhisic : MonoBehaviour
     public static MovementPhisic instance;
 
     [Header("Shooting")]
-    [SerializeField] private Transform firePoint; // Ubicacion de donde sale la bala
+    [SerializeField] private Transform firePoint;
     [SerializeField] private float fireRate = 0.5f; 
     [SerializeField] private int bulletDamage = 25;
     private float nextFireTime = 0f;
+    public bool canMove = true; 
 
     private void Awake(){
         instance = this;
@@ -34,7 +33,6 @@ public class MovementPhisic : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
-        // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
         GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
         originalFireRate = fireRate;
     }
@@ -55,8 +53,8 @@ public class MovementPhisic : MonoBehaviour
 
 
         currentHealth -= damage;
-        // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
         GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
+        GameEvents.PlayerTookDamage(); 
         if(currentHealth <= 0){
             Debug.Log("Fin del juego");
 
@@ -64,7 +62,7 @@ public class MovementPhisic : MonoBehaviour
             animator.SetBool("LeblancDeath", true);
 
 
-            // Desactivamos el control para que no haya interferencias.
+            // Se desactiva el control para que no haya interferencias.
             this.enabled = false; 
 
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
@@ -73,33 +71,20 @@ public class MovementPhisic : MonoBehaviour
             float deactivetObjectDuration = 1.7f;
 
             Invoke("DeactivateObject",deactivetObjectDuration);
-            // GameManager.Instance.GameOver(false);
             GameEvents.GameOver(false);
         }
     }
 
-    // public void AddScore(){
-
-        
-
-    //     currentScore++;
-        
-    //     if(currentScore >= maxScore){
-    //         animator.SetBool("LeblancWin", true);
-    //         // Desactivamos el control para que no haya interferencias.
-    //         this.enabled = false; 
-
-    //         GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-    //         float deactivetObjectDuration = 1f;
-
-    //         Debug.Log("You Win");
-    //         Invoke("DeactivateObject",deactivetObjectDuration);
-    //     }
-    // }
-
+ 
 
      void FixedUpdate()
     {
+        if (!canMove)
+        {
+            rb.velocity = Vector2.zero; 
+            animator.SetFloat("Speed", 0); 
+            return; 
+        }
         // Input de movimiento de ambos ejes
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical"); 
@@ -116,6 +101,8 @@ public class MovementPhisic : MonoBehaviour
 
      void Update()
     {
+
+        if (!canMove) return;
 
         //Obtiene la posicion del mouse en el mundo del juego
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -192,7 +179,6 @@ public void Heal(int amount)
         currentHealth = maxHealth;
     }
     Debug.Log("Jugador curado! Vida actual: " + currentHealth);
-    // GameManager.Instance.UpdatePlayerHealthUI(currentHealth, maxHealth);
     GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
 }
 
@@ -200,7 +186,7 @@ public void ApplyAttackSpeedBuff(float multiplier, float duration)
 {
     if (attackSpeedCoroutine != null)
     {
-        StopCoroutine(attackSpeedCoroutine); // Detiene el buff anterior si había uno
+        StopCoroutine(attackSpeedCoroutine);
     }
     attackSpeedCoroutine = StartCoroutine(AttackSpeedBuffCoroutine(multiplier, duration));
 }
@@ -210,7 +196,7 @@ private IEnumerator AttackSpeedBuffCoroutine(float multiplier, float duration)
     Debug.Log("Buff de velocidad de ataque activado!");
     fireRate *= multiplier; // Aumentamos la velocidad de ataque
 
-    yield return new WaitForSeconds(duration); // Esperamos la duración del buff
+    yield return new WaitForSeconds(duration);
 
     Debug.Log("Buff de velocidad de ataque terminado.");
     fireRate = originalFireRate; // Restauramos la velocidad de ataque original

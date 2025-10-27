@@ -5,16 +5,16 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance;
 
     [Header("Audio Sources")]
-    [SerializeField] private AudioSource musicSource; // El componente que reproducirá la música
-    [SerializeField] private AudioSource sfxSource;   // El componente para efectos de sonido cortos
+    [SerializeField] private AudioSource musicSource; 
+    [SerializeField] private AudioSource sfxSource;   
 
     private void Awake()
     {
-        // Patrón Singleton para asegurar que solo haya una instancia
+        
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Opcional: para que la música no se corte entre escenas
+            DontDestroyOnLoad(gameObject); 
         }
         else
         {

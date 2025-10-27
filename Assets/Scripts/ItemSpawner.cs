@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {
-    public GameObject[] itemPrefabs; // Arrastra aquí tus prefabs de poción y estrella
+    public GameObject[] itemPrefabs; //  prefabs de poción y estrella
     public float spawnInterval = 10f; // Tiempo entre cada aparición
     public Transform[] spawnPoints; // Puntos donde pueden aparecer los items
 
@@ -15,7 +15,7 @@ public class ItemSpawner : MonoBehaviour
 
     private IEnumerator SpawnItemsRoutine()
     {
-        while (true) // Bucle infinito
+        while (true) 
         {
             yield return new WaitForSeconds(spawnInterval);
             SpawnRandomItem();
