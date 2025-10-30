@@ -318,7 +318,7 @@ public class GameManager : MonoBehaviour
         if (isLastLevel)
         {
             // Es el último nivel
-            endGameText.text = "¡VICTORIA!\n\nAl destruir el último monolito, una explosión de energía pura desintegra a los cultistas restantes y silencia las catacumbas. El regreso de Mordekaiser ha sido frustrado, y la oscuridad se retira una vez más ante el poder de LeBlanc.";
+            endGameText.text = "¡VICTORIA!\n\nTras acabar con el último enemigo, una explosión de energía pura desintegra a los cultistas restantes y silencia las catacumbas. El regreso de Mordekaiser ha sido frustrado, y la oscuridad se retira una vez más ante el poder de LeBlanc.";
             
             if (nextLevelButton != null) nextLevelButton.SetActive(false);
             

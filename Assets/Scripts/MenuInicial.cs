@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI; 
+using DG.Tweening;
 
 public class MenuInicial : MonoBehaviour
 {
     [Header("Menus")]
     public GameObject principalMenu;
     public GameObject optionsMenu;
+    public GameObject creditsMenu;
+    public GameObject tutorialMenu;
+    public AudioSource EnterToPlay;
+    public AudioSource CanNotEnter;
+
 
     [Header("Level Buttons")]
     public Button level2Button;
@@ -16,6 +22,10 @@ public class MenuInicial : MonoBehaviour
 
     void Start()
     {
+        if (AudioManager.Instance != null)
+    {
+        AudioManager.Instance.StopMusic();
+    }
         
         UpdateButtonStates();
     }
@@ -39,7 +49,9 @@ public class MenuInicial : MonoBehaviour
     // Carga el Nivel 1 (siempre disponible)
     public void play()
     {
-    
+        EnterToPlay.Play();
+        DOTween.KillAll();
+        
         SceneManager.LoadScene(1); 
     }
 
@@ -49,10 +61,13 @@ public class MenuInicial : MonoBehaviour
         int highestLevelReached = PlayerPrefs.GetInt("LevelReached", 1);
         if (highestLevelReached >= 2)
         {
+            EnterToPlay.Play();
+            DOTween.KillAll();
             SceneManager.LoadScene(2);
         }
         else
         {
+            CanNotEnter.Play();
             Debug.Log("Nivel 2 está bloqueado. ¡Completa el nivel anterior primero!");
         }
     }
@@ -63,10 +78,13 @@ public class MenuInicial : MonoBehaviour
         int highestLevelReached = PlayerPrefs.GetInt("LevelReached", 1);
         if (highestLevelReached >= 3)
         {
+            EnterToPlay.Play();
+            DOTween.KillAll();
             SceneManager.LoadScene(3);
         }
         else
         {
+            CanNotEnter.Play();
             Debug.Log("Nivel 3 está bloqueado. ¡Completa los niveles anteriores primero!");
         }
     }
@@ -81,7 +99,23 @@ public class MenuInicial : MonoBehaviour
     {
         principalMenu.SetActive(true);    
         optionsMenu.SetActive(false);    
+        creditsMenu.SetActive(false);
+        tutorialMenu.SetActive(false);
     }
+
+    public void MostrarMenuCreditos()
+    {
+        principalMenu.SetActive(false); 
+        creditsMenu.SetActive(true);    
+    }
+
+    public void mostrarTutorialMenu()
+    {
+        principalMenu.SetActive(false); 
+        tutorialMenu.SetActive(true);    
+    }
+
+  
 
     public void exit()
     {

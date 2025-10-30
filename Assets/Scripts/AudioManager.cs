@@ -26,7 +26,10 @@ public class AudioManager : MonoBehaviour
     {
         if (musicClip == null) return;
 
+        musicSource.Stop();
+    
         musicSource.clip = musicClip;
+        
         musicSource.Play();
     }
 

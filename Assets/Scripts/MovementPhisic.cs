@@ -11,6 +11,8 @@ public class MovementPhisic : MonoBehaviour
     private int moveX;
     private float originalFireRate;
     private Coroutine attackSpeedCoroutine;
+    public AudioSource shootSound;
+    public AudioSource damageSound;
 
     private bool facingRight = false;
     [SerializeField] private Animator animator;
@@ -55,6 +57,7 @@ public class MovementPhisic : MonoBehaviour
         currentHealth -= damage;
         GameEvents.PlayerHealthChanged(currentHealth, maxHealth);
         GameEvents.PlayerTookDamage(); 
+        damageSound.Play();
         if(currentHealth <= 0){
             Debug.Log("Fin del juego");
 
@@ -136,6 +139,7 @@ public class MovementPhisic : MonoBehaviour
         GameObject bulletObject = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", firePoint.position, firePoint.rotation);
         if (bulletObject != null)
         {
+            shootSound.Play();
             Bullet bulletScript = bulletObject.GetComponent<Bullet>();
             // Usamos la dirección que le pasamos al método
             bulletScript.SetDirection(direction);
@@ -160,12 +164,14 @@ public class MovementPhisic : MonoBehaviour
 
         if (bulletObject != null)
         {
+            shootSound.Play();
             Bullet bulletScript = bulletObject.GetComponent<Bullet>();
 
             // Se decide la direccion del disparo dependiendo de donde mire el jugador
             Vector2 shootDirection = facingRight ? Vector2.right : Vector2.left;
 
             bulletScript.SetDirection(shootDirection);
+            
         }
     }
 
